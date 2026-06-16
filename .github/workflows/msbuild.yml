@@ -13,13 +13,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration:
-          - GTA3 Release
-          - GTA3 zDebug
-          - GTAVC Release
-          - GTAVC zDebug
-          - GTASA Release
-          - GTASA zDebug
+        include:
+          - configuration: GTASA Release
+            sdk_configuration: Release
+          - configuration: GTASA zDebug
+            sdk_configuration: zDebug
 
     steps:
       - name: Checkout CLEO+
@@ -58,7 +56,24 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Compile ${{ matrix.configuration }}
+      - name: Generate plugin-sdk Visual Studio projects
+        shell: pwsh
+        env:
+          PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
+        run: |
+          & "${env:PLUGIN_SDK_DIR}\tools\premake\premake5.exe" vs2022 --pluginsdkdir="${env:PLUGIN_SDK_DIR}"
+
+      - name: Build plugin-sdk San Andreas library
+        shell: pwsh
+        env:
+          PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
+        run: |
+          msbuild "${env:PLUGIN_SDK_DIR}\Plugin_SA\Plugin_SA.vcxproj" `
+            /m `
+            /p:Configuration="${{ matrix.sdk_configuration }}" `
+            /p:Platform=Win32
+
+      - name: Build CLEO+
         shell: pwsh
         env:
           PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
@@ -66,8 +81,14 @@ jobs:
         run: |
           msbuild CLEOPlus/CLEOPlus.vcxproj `
             /m `
-            /t:ClCompile `
             /p:Configuration="${{ matrix.configuration }}" `
             /p:Platform=Win32 `
             /p:OutDir="${{ github.workspace }}\artifacts\${{ matrix.configuration }}\\" `
             /p:IntDir="${{ github.workspace }}\obj\${{ matrix.configuration }}\\"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CLEOPlus-${{ matrix.configuration }}
+          path: artifacts/${{ matrix.configuration }}/
+          if-no-files-found: error
