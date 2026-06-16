@@ -27,6 +27,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: DK22Pac/plugin-sdk
+          # This project targets the plugin-sdk 2020-era API used by the source.
+          # Newer plugin-sdk commits renamed many game fields and changed helper APIs.
+          ref: c03810d6f44b149447d0f418fc9915d30a3a57cc
           path: external/plugin-sdk
 
       - name: Checkout CLEO SDK
