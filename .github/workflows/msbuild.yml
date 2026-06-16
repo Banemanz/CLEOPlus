@@ -27,6 +27,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: DK22Pac/plugin-sdk
+          # This source matches the 2020-era plugin-sdk declarations used by the project.
+          ref: c03810d6f44b149447d0f418fc9915d30a3a57cc
           path: external/plugin-sdk
 
       - name: Checkout CLEO SDK
@@ -62,7 +64,7 @@ jobs:
           PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
         run: |
           Push-Location "${env:PLUGIN_SDK_DIR}\tools\premake"
-          & ".\premake5.exe" vs2022
+          & ".\premake5.exe" vs2019
           Pop-Location
 
       - name: Build plugin-sdk San Andreas library
