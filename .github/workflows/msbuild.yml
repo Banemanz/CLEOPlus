@@ -61,7 +61,9 @@ jobs:
         env:
           PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
         run: |
-          & "${env:PLUGIN_SDK_DIR}\tools\premake\premake5.exe" vs2022 --pluginsdkdir="${env:PLUGIN_SDK_DIR}"
+          Push-Location "${env:PLUGIN_SDK_DIR}\tools\premake"
+          & ".\premake5.exe" vs2022
+          Pop-Location
 
       - name: Build plugin-sdk San Andreas library
         shell: pwsh
