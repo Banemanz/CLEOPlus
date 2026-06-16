@@ -75,7 +75,8 @@ jobs:
           msbuild "${env:PLUGIN_SDK_DIR}\Plugin_SA\Plugin_SA.vcxproj" `
             /m `
             /p:Configuration="${{ matrix.sdk_configuration }}" `
-            /p:Platform=Win32
+            /p:Platform=Win32 `
+            /p:PlatformToolset=v143
 
       - name: Build CLEO+
         shell: pwsh
