@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.configuration }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - GTA3 Release
+          - GTA3 zDebug
+          - GTAVC Release
+          - GTAVC zDebug
+          - GTASA Release
+          - GTASA zDebug
+
+    steps:
+      - name: Checkout CLEO+
+        uses: actions/checkout@v4
+
+      - name: Checkout plugin-sdk
+        uses: actions/checkout@v4
+        with:
+          repository: DK22Pac/plugin-sdk
+          path: external/plugin-sdk
+
+      - name: Checkout CLEO SDK
+        uses: actions/checkout@v4
+        with:
+          repository: cleolibrary/CLEO4
+          path: external/CLEO4
+
+      - name: Locate CLEO SDK for San Andreas
+        id: cleo-sdk
+        shell: pwsh
+        run: |
+          $candidates = @(
+            "external/CLEO4/cleo_sdk",
+            "external/CLEO4/CLEO SDK",
+            "external/CLEO4/source/cleo_sdk",
+            "external/CLEO4"
+          )
+          foreach ($candidate in $candidates) {
+            if (Test-Path (Join-Path $candidate "CLEO.h")) {
+              "dir=$candidate" >> $env:GITHUB_OUTPUT
+              exit 0
+            }
+          }
+          Write-Error "Could not find CLEO.h in the checked-out CLEO4 repository. Update the candidates in this workflow if CLEO4 moves its SDK headers."
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Compile ${{ matrix.configuration }}
+        shell: pwsh
+        env:
+          PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
+          CLEO_SDK_SA_DIR: ${{ github.workspace }}\${{ steps.cleo-sdk.outputs.dir }}
+        run: |
+          msbuild CLEOPlus/CLEOPlus.vcxproj `
+            /m `
+            /t:ClCompile `
+            /p:Configuration="${{ matrix.configuration }}" `
+            /p:Platform=Win32 `
+            /p:IntDir="${{ github.workspace }}\obj\${{ matrix.configuration }}\\"
