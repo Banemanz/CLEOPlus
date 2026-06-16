@@ -69,4 +69,5 @@ jobs:
             /t:ClCompile `
             /p:Configuration="${{ matrix.configuration }}" `
             /p:Platform=Win32 `
+            /p:OutDir="${{ github.workspace }}\artifacts\${{ matrix.configuration }}\\" `
             /p:IntDir="${{ github.workspace }}\obj\${{ matrix.configuration }}\\"

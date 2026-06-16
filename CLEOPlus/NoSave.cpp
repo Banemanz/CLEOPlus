@@ -12,10 +12,10 @@ OpcodeResult WINAPI SET_CAR_GENERATOR_NO_SAVE(CScriptThread* thread)
 	int ref = CLEO_GetIntOpcodeParam(thread);
 
 	int8_t size = injector::ReadMemory<int8_t>(0x006F32AA, true);
-	if (size >= 0x30)
+	if (size >= static_cast<int8_t>(offsetof(CCarGenerator_extended, exIplFile) + sizeof(CCarGenerator_extended::exIplFile)))
 	{
 		CCarGenerator_extended * generator = reinterpret_cast<CCarGenerator_extended*>(&CTheCarGenerators::CarGeneratorArray[ref]);
-		generator->exIplFile = 0xFFFF;
+		generator->exIplFile = UINT32_MAX;
 	}
 	else {
 		CCarGenerator * generator = reinterpret_cast<CCarGenerator_extended*>(&CTheCarGenerators::CarGeneratorArray[ref]);
