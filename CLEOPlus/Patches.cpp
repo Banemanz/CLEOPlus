@@ -82,7 +82,7 @@ void ApplyPatches()
 			CPed* ped = (CPed*)(regs.eax);
 			regs.eax = ePedState::PEDSTATE_DEAD;
 			if (ped) {
-				if (ped->m_fHealth <= 0.0f && ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_eWeaponType != eWeaponType::WEAPON_PARACHUTE) {
+				if (ped->m_fHealth <= 0.0f && ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_nType != eWeaponType::WEAPON_PARACHUTE) {
 				}
 				else {
 					regs.eax = ped->m_nPedState; //original code

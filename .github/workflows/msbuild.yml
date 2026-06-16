@@ -1,0 +1,99 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.configuration }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - configuration: GTASA Release
+            sdk_configuration: Release
+          - configuration: GTASA zDebug
+            sdk_configuration: zDebug
+
+    steps:
+      - name: Checkout CLEO+
+        uses: actions/checkout@v4
+
+      - name: Checkout plugin-sdk
+        uses: actions/checkout@v4
+        with:
+          repository: DK22Pac/plugin-sdk
+          # This source matches the 2020-era plugin-sdk declarations used by the project.
+          ref: c03810d6f44b149447d0f418fc9915d30a3a57cc
+          path: external/plugin-sdk
+
+      - name: Checkout CLEO SDK
+        uses: actions/checkout@v4
+        with:
+          repository: cleolibrary/CLEO4
+          path: external/CLEO4
+
+      - name: Locate CLEO SDK for San Andreas
+        id: cleo-sdk
+        shell: pwsh
+        run: |
+          $candidates = @(
+            "external/CLEO4/cleo_sdk",
+            "external/CLEO4/CLEO SDK",
+            "external/CLEO4/source/cleo_sdk",
+            "external/CLEO4"
+          )
+          foreach ($candidate in $candidates) {
+            if (Test-Path (Join-Path $candidate "CLEO.h")) {
+              "dir=$candidate" >> $env:GITHUB_OUTPUT
+              exit 0
+            }
+          }
+          Write-Error "Could not find CLEO.h in the checked-out CLEO4 repository. Update the candidates in this workflow if CLEO4 moves its SDK headers."
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Generate plugin-sdk Visual Studio projects
+        shell: pwsh
+        env:
+          PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
+        run: |
+          Push-Location "${env:PLUGIN_SDK_DIR}\tools\premake"
+          & ".\premake5.exe" vs2019
+          Pop-Location
+
+      - name: Build plugin-sdk San Andreas library
+        shell: pwsh
+        env:
+          PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
+        run: |
+          msbuild "${env:PLUGIN_SDK_DIR}\Plugin_SA\Plugin_SA.vcxproj" `
+            /m `
+            /p:Configuration="${{ matrix.sdk_configuration }}" `
+            /p:Platform=Win32 `
+            /p:PlatformToolset=v143
+
+      - name: Build CLEO+
+        shell: pwsh
+        env:
+          PLUGIN_SDK_DIR: ${{ github.workspace }}\external\plugin-sdk
+          CLEO_SDK_SA_DIR: ${{ github.workspace }}\${{ steps.cleo-sdk.outputs.dir }}
+        run: |
+          msbuild CLEOPlus/CLEOPlus.vcxproj `
+            /m `
+            /p:Configuration="${{ matrix.configuration }}" `
+            /p:Platform=Win32 `
+            /p:OutDir="${{ github.workspace }}\artifacts\${{ matrix.configuration }}\\" `
+            /p:IntDir="${{ github.workspace }}\obj\${{ matrix.configuration }}\\"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CLEOPlus-${{ matrix.configuration }}
+          path: artifacts/${{ matrix.configuration }}/
+          if-no-files-found: error

@@ -610,7 +610,7 @@ OpcodeResult WINAPI DOES_CAR_HAVE_PART_NODE(CScriptThread* thread)
 OpcodeResult WINAPI GET_CURRENT_CHAR_WEAPONINFO(CScriptThread* thread)
 {
 	CPed *ped = CPools::GetPed(CLEO_GetIntOpcodeParam(thread));
-	eWeaponType weaponType = ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_eWeaponType;
+	eWeaponType weaponType = ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_nType;
 	CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, ped->GetWeaponSkill(weaponType));
 	CLEO_SetIntOpcodeParam(thread, (DWORD)weaponInfo);
 	reinterpret_cast<CRunningScript*>(thread)->UpdateCompareFlag(weaponInfo != nullptr);
@@ -663,7 +663,7 @@ OpcodeResult WINAPI GET_WEAPONINFO_FLAGS(CScriptThread* thread)
 OpcodeResult WINAPI GET_WEAPONINFO_ANIMGROUP(CScriptThread* thread)
 {
 	CWeaponInfo *weaponInfo = (CWeaponInfo *)CLEO_GetIntOpcodeParam(thread);
-	CLEO_SetIntOpcodeParam(thread, (DWORD)weaponInfo->m_nAnimToPlay);
+	CLEO_SetIntOpcodeParam(thread, (DWORD)weaponInfo->m_dwAnimGroup);
 	return OR_CONTINUE;
 }
 
@@ -1120,7 +1120,7 @@ OpcodeResult WINAPI GET_CHAR_PROOFS(CScriptThread* thread)
 	CLEO_SetIntOpcodeParam(thread, (DWORD)ped->m_nPhysicalFlags.bFireProof);
 	CLEO_SetIntOpcodeParam(thread, (DWORD)ped->m_nPhysicalFlags.bExplosionProof);
 	CLEO_SetIntOpcodeParam(thread, (DWORD)ped->m_nPhysicalFlags.bCollisionProof);
-	CLEO_SetIntOpcodeParam(thread, (DWORD)ped->m_nPhysicalFlags.bMeleeProof);
+	CLEO_SetIntOpcodeParam(thread, (DWORD)ped->m_nPhysicalFlags.bMeeleProof);
 	return OR_CONTINUE;
 }
 
@@ -1131,7 +1131,7 @@ OpcodeResult WINAPI GET_CAR_PROOFS(CScriptThread* thread)
 	CLEO_SetIntOpcodeParam(thread, (DWORD)vehicle->m_nPhysicalFlags.bFireProof);
 	CLEO_SetIntOpcodeParam(thread, (DWORD)vehicle->m_nPhysicalFlags.bExplosionProof);
 	CLEO_SetIntOpcodeParam(thread, (DWORD)vehicle->m_nPhysicalFlags.bCollisionProof);
-	CLEO_SetIntOpcodeParam(thread, (DWORD)vehicle->m_nPhysicalFlags.bMeleeProof);
+	CLEO_SetIntOpcodeParam(thread, (DWORD)vehicle->m_nPhysicalFlags.bMeeleProof);
 	return OR_CONTINUE;
 }
 
@@ -1142,7 +1142,7 @@ OpcodeResult WINAPI GET_OBJECT_PROOFS(CScriptThread* thread)
 	CLEO_SetIntOpcodeParam(thread, (DWORD)object->m_nPhysicalFlags.bFireProof);
 	CLEO_SetIntOpcodeParam(thread, (DWORD)object->m_nPhysicalFlags.bExplosionProof);
 	CLEO_SetIntOpcodeParam(thread, (DWORD)object->m_nPhysicalFlags.bCollisionProof);
-	CLEO_SetIntOpcodeParam(thread, (DWORD)object->m_nPhysicalFlags.bMeleeProof);
+	CLEO_SetIntOpcodeParam(thread, (DWORD)object->m_nPhysicalFlags.bMeeleProof);
 	return OR_CONTINUE;
 }
 
@@ -1743,7 +1743,7 @@ OpcodeResult WINAPI GET_CHAR_FEAR(CScriptThread* thread)
 OpcodeResult WINAPI IS_CAR_CONVERTIBLE(CScriptThread* thread)
 {
 	CVehicle *vehicle = CPools::GetVehicle(CLEO_GetIntOpcodeParam(thread));
-	reinterpret_cast<CRunningScript*>(thread)->UpdateCompareFlag(vehicle->m_pHandlingData->m_nModelFlags.m_bConvertible); // for current plugin-sdk version need to add m_nModelFlags to union struct
+	reinterpret_cast<CRunningScript*>(thread)->UpdateCompareFlag(vehicle->m_pHandlingData->m_bConvertible);
 	return OR_CONTINUE;
 }
  

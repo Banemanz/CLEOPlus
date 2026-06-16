@@ -1272,13 +1272,13 @@ public:
 
 			startSaveGame += []
 			{
-				currentSaveSlot = FrontEndMenuManager.m_nSelectedSaveGame;
+				currentSaveSlot = FrontEndMenuManager.m_bSelectedSaveGame;
 				for (auto scriptEvent : scriptEvents[ScriptEvent::List::SaveConfirmation]) scriptEvent->RunScriptEvent(currentSaveSlot + 1);
 			};
 
 			loadingEvent += []
 			{
-				currentSaveSlot = FrontEndMenuManager.m_nSelectedSaveGame;
+				currentSaveSlot = FrontEndMenuManager.m_bSelectedSaveGame;
 			};
 
 			// Fixes corrupted old saves with deleted LOD objects
@@ -1600,7 +1600,7 @@ public:
 	static void __fastcall MyDoBulletImpact(CWeapon* weapon, int i, CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int a7)
 	{
 		if (scriptEvents[ScriptEvent::List::BulletImpact].size() > 0) {
-			for (auto scriptEvent : scriptEvents[ScriptEvent::List::BulletImpact]) scriptEvent->RunScriptEvent((DWORD)owner, (DWORD)victim, (DWORD)weapon->m_eWeaponType, (DWORD)colPoint);
+			for (auto scriptEvent : scriptEvents[ScriptEvent::List::BulletImpact]) scriptEvent->RunScriptEvent((DWORD)owner, (DWORD)victim, (DWORD)weapon->m_nType, (DWORD)colPoint);
 		}
 		weapon->DoBulletImpact(owner, victim, startPoint, endPoint, colPoint, a7);
 		return;
